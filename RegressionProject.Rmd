@@ -1,0 +1,105 @@
+---
+title: "RegressionProject"
+author: "Hnin Su PHYU"
+date: "8/27/2020"
+output: pdf_document
+---
+
+##Overview
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+“Is an automatic or manual transmission better for MPG”
+"Quantify the MPG difference between automatic and manual transmissions"
+##Dataset
+```{r}
+library(datasets)
+data(mtcars)
+head(mtcars)
+```
+##Processing Data
+```{r}
+mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$am <- as.factor(mtcars$am)
+str(mtcars)
+```
+##Exploratory analysis with Appendix: Figures
+The mean of the variant cars (by transmission types) for their MPG:
+```{r}
+mtcars$am<-as.factor(mtcars$am)
+levels(mtcars$am)<-c("Auto", "Man.")
+aggregate(mpg ~ am, data = mtcars, mean)
+```
+We can see from this simple view that the mean average of MPG’s for Automatic cars outstrips that of Manual.
+
+We should see if this variance is significant - via running a t-test:
+```{r}
+Auto.Data <- mtcars[mtcars$am == "Auto",]
+Manu.Data <- mtcars[mtcars$am == "Man.",]
+
+t.test(Auto.Data$mpg, Manu.Data$mpg)
+```
+```{r}
+library(ggplot2)
+## Box Plot  of MPG by Transmission Type
+g <- ggplot(aes(x = am, y = mpg), data = mtcars)  
+g <- g + geom_boxplot(aes(fill = am))
+g + labs(x = "Transmission Type", y = "MPG", title = "MPG by Transmission Type") +
+        theme(plot.title = element_text(color="grey25", face="bold",hjust=0.5)) +
+        scale_fill_manual(values=c("aquamarine4","lightsteelblue4"))
+```
+```{r}
+## Histgram of MPG
+hist(mtcars$mpg, breaks=12, xlab="Miles Per Gallon (MPG)", main="MPG Distribution", col="aquamarine4")
+```
+##Regression modelling
+```{r}
+singleVariableRegressionModel <- lm(mpg ~ am, data = mtcars)
+summary(singleVariableRegressionModel)
+```
+
+Since Adjusted R^2 = 0.3385, thus only 33.85% of the regression variance of this model is explained.
+
+```{r}
+multiVariableRegressionModel <- lm(mpg ~ am + wt + hp, data = mtcars)
+summary(multiVariableRegressionModel)
+```
+Compared to single variable regression model, the Adjusted R^2 = 0.823, thus approximately 82.3% of the regression variance of this model is explained.
+```{r}
+anova(singleVariableRegressionModel, multiVariableRegressionModel)
+```
+Since the p-value is 3.745e-09, we can now reject the H0 and state that our Multivariable Model is considerably different than the Single Linear Regression Model.
+```{r}
+t.test(mtcars$mpg~mtcars$am)
+```
+With assumption that all other conditions remain unchanged. Since p-value = 0.001374 which is less than 0.05, we conclude that manual transmission is better than automatic transmission for MPG and reject the null hypothesis that there is no difference in MPG.
+
+##Executive Summary
+The key finding of this analysis is that manual transmission on average has a better miles per gallon (mpg) than its counterpart i.e. automatic transmission.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
